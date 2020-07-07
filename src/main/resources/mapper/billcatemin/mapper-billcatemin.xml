@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.5.4//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bill.dao.BillCateMinDao">
+    <!--查询用户的小类-->
+    <select id="queryBillCateMinList" parameterType="BillCateMin" resultType="BillCateMin">
+        SELECT bcm.`billCateMinId`,bcb.`billCategoryName`,bcm.`billCateMinName`,bcm.`createDate`
+        FROM `bill_cate_min` bcm
+        LEFT JOIN `bill_category_tb` bcb
+        ON bcb.`billCategoryId`=bcm.`billCategoryId`
+        WHERE bcm.`userId`=#{userId}
+        <if test="billCategoryId!=null and billCategoryId!=''">
+            AND bcm.`billCategoryId`=#{billCategoryId}
+        </if>
+        <if test="billCateMinName!=null and billCateMinName!=''">
+            AND bcm.`billCateMinName` LIKE CONCAT(CONCAT('%', #{billCateMinName}), '%')
+        </if>
+        ORDER  BY bcb.`billCategoryName`
+    </select>
+
+    <!--检查是否存在小类-->
+    <select id="checkBillCateMin" resultType="BillCateMin">
+        select `billCateMinName`
+        from `bill_cate_min`
+        where `userId`=#{userId} and `billCateMinName`=#{billCateMinName}
+    </select>
+
+    <!--添加小类信息-->
+    <insert id="addBillCateMinInfo">
+        insert into `bill_cate_min`(`userId`,`billCategoryId`,`billCateMinName`,`createDate`)
+        values(#{userId},#{billCategoryId},#{billCateMinName},#{createDate})
+    </insert>
+
+    <!--查询要修改的小类-->
+    <select id="queryUpdateBillCateMin" resultType="BillCateMin">
+        SELECT `billCateMinId`,`billCategoryId`,`billCateMinName`
+        FROM `bill_cate_min`
+        WHERE `userId`=#{userId} and `billCateMinId`=#{billCateMinId}
+    </select>
+
+    <!--修改小类信息-->
+    <update id="updateBillCateMinInfo">
+        update `bill_cate_min`
+        set `billCategoryId`=#{billCategoryId},`billCateMinName`=#{billCateMinName},`updateDate`=#{updateDate}
+        where `userId`=#{userId} and `billCateMinId`=#{billCateMinId}
+    </update>
+
+    <!--删除单个小类信息-->
+    <delete id="delOnBillCateMinInfo">
+        delete from `bill_cate_min`
+        where `userId`=#{userId} and `billCateMinId`=#{billCateMinId}
+    </delete>
+
+    <!--删除选中的小类信息-->
+    <delete id="delSelectBillCateMin">
+        delete from `bill_cate_min`
+        where `userId`=#{userId} and `billCateMinId` in
+        <foreach collection="billCateMinIds" item="id" index="no" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!--根据大类id和用户id查询小类-->
+    <select id="queryBillCateMinInfo" resultType="BillCateMin">
+        SELECT `billCateMinId`,`billCateMinName`
+        FROM `bill_cate_min`
+        WHERE `userId`=#{userId} AND `billCategoryId`=#{billCategoryId}
+    </select>
+</mapper>

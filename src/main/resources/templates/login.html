@@ -1,0 +1,41 @@
+<!DOCTYPE html >
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>登录</title>
+	<link rel="shortcut icon"  href="myimg/duanxin.png" th:href="@{myimg/duanxin.png}"/>
+	<link rel="stylesheet" type="text/css" href="layui/css/layui.css" th:href="@{layui/css/layui.css}"/>
+	<link rel="stylesheet" type="text/css" href="css/style.css" th:href="@{css/style.css}"/>
+	<link rel="stylesheet" type="text/css" href="css/body.css" th:href="@{css/body.css}"/>
+	<script type="text/javascript" src="myjs/jquery-2.0.2.min.js" th:src="@{myjs/jquery-2.0.2.min.js}"></script>
+	<script type="text/javascript" src="layui/layui.js" th:src="@{layui/layui.js}"></script>
+	<script type="text/javascript" src="myjs/login/userlogin.js" th:src="@{myjs/login/userlogin.js}"></script>
+	<!--大类-->
+	
+</head>
+<body>
+<div class="container">
+	<section id="content">
+		<form class="userInfo">
+			<h1>登录</h1>
+			<div>
+				<input type="text" placeholder="用户名" required="" id="userName" name="userName"/>
+			</div>
+			<div>
+				<input type="password" placeholder="密码" required="" id="password" name="passWord"/>
+			</div>
+			 <div class="">
+				<span class="help-block u-errormessage" id="js-server-helpinfo">&nbsp;</span>			</div> 
+			<div>
+				<!-- <input type="submit" value="Log in" /> -->
+				<button type="button" value="登录" class="btn btn-primary login_btn" id="js-btn-login">登录</button>
+				<a href="#">忘记密码?</a>
+				<a href="register">注册</a>
+				<!-- <a href="#">Register</a> -->
+			</div>
+		</form><!-- form -->
+	</section><!-- content -->
+</div>
+<!-- container -->
+</body>
+</html>

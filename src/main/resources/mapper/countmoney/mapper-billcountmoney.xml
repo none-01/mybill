@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.5.4//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bill.dao.CountMoneyDao">
+    <!--查询排行榜-->
+    <select id="queryCountBillMoneyOderby" resultType="BillIng">
+        SELECT `expDate`,`billDesCribe`,`money`
+        FROM `bill_ing_tb`
+        WHERE userId=#{userId}
+        <if test="yearMonthType=='month'">
+            AND DATE_FORMAT(`expDate`,'%Y-%m')=#{countDateType}
+        </if>
+        <if test="yearMonthType=='year'">
+            AND YEAR(`expDate`)=#{countDateType}
+        </if>
+        AND `billType`=#{billType}
+        ORDER BY `money` DESC
+        LIMIT 9
+    </select>
+
+    <!--查询支出收入明细-->
+    <select id="queryCountBillMoneyDetaileds" resultType="CountMoney">
+        SELECT `expDate` as date,SUM(`money`) as countMoney
+        FROM `bill_ing_tb`
+        WHERE userId=#{userId}
+        <if test="yearMonthType=='month'">
+            AND DATE_FORMAT(`expDate`,'%Y-%m')=#{countDateType}
+        </if>
+        <if test="yearMonthType=='year'">
+            AND YEAR(`expDate`)=#{countDateType}
+        </if>
+        AND `billType`=#{billType}
+        GROUP BY
+        <if test="yearMonthType=='month'">
+            `expDate`
+        </if>
+        <if test="yearMonthType=='year'">
+            DATE_FORMAT(`expDate`,'%m')
+        </if>
+    </select>
+
+    <!--查询大类支出收入明细-->
+    <select id="queryCountBillMoneyPercentage" resultType="CountMoney">
+        SELECT
+        <if test="yearMonthType=='month'">
+            DATE_FORMAT(bib.`expDate`,'%Y-%m') as countDate,
+        </if>
+        <if test="yearMonthType=='year'">
+            YEAR(bib.`expDate`) as countDate,
+        </if>
+        bcb.`billCategoryName`,SUM(bib.`money`) as countMoney,
+        ROUND(SUM(bib.`money`)/(
+            SELECT SUM(binb.`money`)
+            FROM bill_ing_tb binb
+            WHERE binb.userId=#{userId}
+            <if test="yearMonthType=='month'">
+                AND DATE_FORMAT(binb.`expDate`,'%Y-%m')=#{countDateType}
+            </if>
+            <if test="yearMonthType=='year'">
+                AND YEAR(binb.`expDate`)=#{countDateType}
+            </if>
+            AND binb.`billType`=#{billType}
+        ),2)*100 as percentage
+        FROM `bill_ing_tb` bib
+        LEFT JOIN `bill_cate_min` bim
+        ON bim.`billCateMinId`=bib.`billCateMinId`
+        LEFT JOIN `bill_category_tb` bcb
+        ON bcb.`billCategoryId`=bim.`billCategoryId`
+        WHERE bib.userId=#{userId}
+        <if test="yearMonthType=='month'">
+            AND DATE_FORMAT(bib.`expDate`,'%Y-%m')=#{countDateType}
+        </if>
+        <if test="yearMonthType=='year'">
+            AND YEAR(bib.`expDate`)=#{countDateType}
+        </if>
+        AND bib.`billType`=#{billType}
+        GROUP BY bcb.`billCategoryId`
+    </select>
+
+    <!--查询收入支出金额-->
+    <select id="queryExpIncCountMoney" resultType="CountExpIncMoney">
+        SELECT (
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE userId=#{userId}
+            AND `billType`='支出'
+            <if test="yearMonthType=='month'">
+                AND DATE_FORMAT(`expDate`,'%Y-%m')=#{countDateType}
+            </if>
+            <if test="yearMonthType=='year'">
+                AND YEAR(`expDate`)=#{countDateType}
+            </if>
+        ) AS expMoney,(
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE userId=#{userId}
+            AND `billType`='收入'
+            <if test="yearMonthType=='month'">
+                AND DATE_FORMAT(`expDate`,'%Y-%m')=#{countDateType}
+            </if>
+            <if test="yearMonthType=='year'">
+                AND YEAR(`expDate`)=#{countDateType}
+            </if>
+        ) AS incMoney
+    </select>
+</mapper>

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.5.4//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bill.dao.BillIngDao">
+    <!--查询用户的账单-->
+    <select id="queryBillIngList" resultType="BillIng">
+        SELECT `bit`.`billIngId`,`bit`.`expDate`,bct.`billCategoryName`,bcmin.`billCateMinName`,
+        `bit`.`billType`,`bit`.money,`bit`.billDesCribe,`bit`.createDate
+        FROM `bill_ing_tb` `bit`
+        LEFT JOIN `bill_cate_min` bcmin
+        ON bcmin.`billCateMinId`=`bit`.`billCateMinId`
+        LEFT JOIN `bill_category_tb` bct
+        ON bct.`billCategoryId`=bcmin.`billCategoryId`
+        WHERE `bit`.userId=#{userId}
+        AND `bit`.expDate BETWEEN #{startDate} AND #{endDate}
+        <if test="billCategoryId!=null and billCategoryId!=''">
+            AND bct.billCategoryId=#{billCategoryId}
+        </if>
+        <if test="billCateMinId!=null and billCateMinId!=''">
+            AND bcmin.billCateMinId=#{billCateMinId}
+        </if>
+        <if test="billType!=null and billType!=''">
+            AND `bit`.billType=#{billType}
+        </if>
+        <if test="billDesCribe!=null and billDesCribe!=''">
+            AND `bit`.billDesCribe LIKE CONCAT(CONCAT('%',#{billDesCribe}),'%')
+        </if>
+    </select>
+
+    <!--支出-->
+    <select id="getExpMoney" resultType="Float">
+        SELECT SUM(`bit`.`money`) AS expMoney
+        FROM `bill_ing_tb` `bit`
+        LEFT JOIN `bill_cate_min` bcmin
+        ON bcmin.`billCateMinId`=`bit`.`billCateMinId`
+        LEFT JOIN `bill_category_tb` bct
+        ON bct.`billCategoryId`=bcmin.`billCategoryId`
+        WHERE `bit`.userId=#{userId}
+        AND `bit`.expDate BETWEEN #{startDate} AND #{endDate}
+        <if test="billCategoryId!=null and billCategoryId!=''">
+            AND bct.billCategoryId=#{billCategoryId}
+        </if>
+        <if test="billCateMinId!=null and billCateMinId!=''">
+            AND bcmin.billCateMinId=#{billCateMinId}
+        </if>
+        <if test="billType!=null and billType!=''">
+            AND `bit`.billType=#{billType}
+        </if>
+        <if test="billDesCribe!=null and billDesCribe!=''">
+            AND `bit`.billDesCribe LIKE CONCAT(CONCAT('%',#{billDesCribe}),'%')
+        </if>
+    </select>
+
+    <!--收入-->
+    <select id="getIncMoney" resultType="Float">
+        SELECT SUM(`bit`.`money`) AS expMoney
+        FROM `bill_ing_tb` `bit`
+        LEFT JOIN `bill_cate_min` bcmin
+        ON bcmin.`billCateMinId`=`bit`.`billCateMinId`
+        LEFT JOIN `bill_category_tb` bct
+        ON bct.`billCategoryId`=bcmin.`billCategoryId`
+        WHERE `bit`.userId=#{userId}
+        AND `bit`.expDate BETWEEN #{startDate} AND #{endDate}
+        <if test="billCategoryId!=null and billCategoryId!=''">
+            AND bct.billCategoryId=#{billCategoryId}
+        </if>
+        <if test="billCateMinId!=null and billCateMinId!=''">
+            AND bcmin.billCateMinId=#{billCateMinId}
+        </if>
+        <if test="billType!=null and billType!=''">
+            AND `bit`.billType=#{billType}
+        </if>
+        <if test="billDesCribe!=null and billDesCribe!=''">
+            AND `bit`.billDesCribe LIKE CONCAT(CONCAT('%',#{billDesCribe}),'%')
+        </if>
+    </select>
+
+    <!--支出信息-->
+    <select id="queryExpMoneyInfo" resultType="ExpIncMoneyInfo">
+        SELECT (
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE `billType`='支出'
+            AND userId=#{userId}
+            AND TO_DAYS(`expDate`) = TO_DAYS(NOW())
+        ) AS sameDayMoney,(
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE `billType`='支出'
+            AND userId=#{userId}
+            AND YEARWEEK(DATE_FORMAT(`expDate`,'%Y-%m-%d'),1) = YEARWEEK(CURDATE(),1)
+        ) AS thisWeekMoney,(
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE `billType`='支出'
+            AND userId=#{userId}
+            AND  DATE_FORMAT(`expDate`,'%Y-%m')=DATE_FORMAT(NOW(),'%Y-%m')
+        ) AS thisMonthMoney,(
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE `billType`='支出'
+            AND userId=#{userId}
+            AND  YEAR(`expDate`)=YEAR(NOW())
+        ) AS thisYearMoney
+    </select>
+
+    <!--收入信息-->
+    <select id="queryIncMoneyInfo" resultType="ExpIncMoneyInfo">
+        SELECT (
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE `billType`='收入'
+            AND userId=#{userId}
+            AND TO_DAYS(`expDate`) = TO_DAYS(NOW())
+        ) AS sameDayMoney,(
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE `billType`='收入'
+            AND userId=#{userId}
+            AND YEARWEEK(DATE_FORMAT(`expDate`,'%Y-%m-%d'),1) = YEARWEEK(CURDATE(),1)
+        ) AS thisWeekMoney,(
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE `billType`='收入'
+            AND userId=#{userId}
+            AND  DATE_FORMAT(`expDate`,'%Y-%m')=DATE_FORMAT(NOW(),'%Y-%m')
+        ) AS thisMonthMoney,(
+            SELECT SUM(`money`)
+            FROM `bill_ing_tb`
+            WHERE `billType`='收入'
+            AND userId=#{userId}
+            AND  YEAR(`expDate`)=YEAR(NOW())
+        ) AS thisYearMoney
+    </select>
+
+    <!--添加账单信息-->
+    <select id="addBillCateIngInfo">
+        insert into `bill_ing_tb`(
+            userId,
+            billCateMinId,
+            expDate,
+            billType,
+            money,
+            billDesCribe,
+            createDate
+        )
+        values(
+            #{userId},
+            #{billCateMinId},
+            #{expDate},
+            #{billType},
+            #{money},
+            #{billDesCribe},
+            #{createDate}
+        )
+    </select>
+
+    <!--查询要修改的账单信息-->
+    <select id="queryUpdateBillIngInfo" resultType="BillIng">
+        SELECT bib.`billIngId`,bcb.`billCategoryId`,bib.`billCateMinId`,bib.`expDate`,bib.`billType`,bib.`money`,bib.`billDesCribe`
+        FROM `bill_ing_tb` bib
+        LEFT JOIN `bill_cate_min` btm
+        ON btm.`billCateMinId`=bib.`billCateMinId`
+        LEFT JOIN `bill_category_tb` bcb
+        ON bcb.`billCategoryId`=btm.`billCategoryId`
+        WHERE bib.userId=#{userId}
+        AND `billIngId`=#{billIngId}
+    </select>
+
+    <!--修改账单信息-->
+    <update id="updateBillIngInfo">
+        update `bill_ing_tb`
+        set billCateMinId=#{billCateMinId},
+            expDate=#{expDate},
+            billType=#{billType},
+            money=#{money},
+            billDesCribe=#{billDesCribe},
+            updateDate=#{updateDate}
+        where userId=#{userId}
+        and billIngId=#{billIngId}
+    </update>
+
+    <!--删除单个账单信息-->
+    <delete id="delOneBillIngInfo">
+        delete from `bill_ing_tb`
+        where userId=#{userId}
+        and billIngId=#{billIngId}
+    </delete>
+
+    <!--删除选中的账单-->
+    <delete id="delSelectBillIng">
+        delete from `bill_ing_tb`
+        where userId=#{userId}
+        and billIngId in
+        <foreach collection="billIngIds" item="id" index="no"  open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>我的简单记账系统</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<!--11-->
+		<link rel="shortcut icon"  th:href="@{myimg/duanxin.png}"/>
+		<!--<link rel="stylesheet" type="text/css" href="layui/css/layui.css" th:href="@{layui/css/layui.css}"/>-->
+		<!--<link rel="stylesheet" type="text/css" href="layui/css/modules/laydate/laydate.css" th:href="@{layui/css/modules/laydate/laydate.css}"/>-->
+		<link type="text/css" href="css/bootstrap.min2.css" rel="stylesheet"/>
+		<link rel="stylesheet" href="mycss/mycss.css" />
+		<script type="text/javascript" src="myjs/jquery-2.0.2.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="myjs/highcharts.js"></script>
+		<script type="text/javascript" src="myjs/count.js"></script>
+		<script type="text/javascript" src="myjs/showdate.js"></script>
+
+		<script type="text/javascript" src="lib/laydate/laydate.js" th:src="@{lib/laydate/laydate.js}"></script>
+		<!--工具js-->
+		<script type="text/javascript" src="myjs/utils/utils.js"></script>
+		<script type="text/javascript" src="layui/layui.js" th:src="@{layui/layui.js}"></script>
+		<!--账单大类-->
+		<script type="text/javascript" src="myjs/billCategory/queryBillCateInfo.js"></script>
+		<script type="text/javascript" src="myjs/billCategory/addBillCate.js"></script>
+		<script type="text/javascript" src="myjs/billCategory/updateBillCate.js"></script>
+		<script type="text/javascript" src="myjs/billCategory/delBillCate.js"></script>
+		<!--账单小类-->
+		<script type="text/javascript" src="myjs/billCateMin/queryBillCateMinInfo.js"></script>
+		<script type="text/javascript" src="myjs/billCateMin/addBillCateMin.js"></script>
+		<script type="text/javascript" src="myjs/billCateMin/updateBillCateMin.js"></script>
+        <script type="text/javascript" src="myjs/billCateMin/delBillCateMin.js"></script>
+		<!--账单信息-->
+		<script type="text/javascript" src="myjs/billIngInfo/queryBillIngInfo.js"></script>
+		<script type="text/javascript" src="myjs/billIngInfo/addBillIngInfo.js"></script>
+		<script type="text/javascript" src="myjs/billIngInfo/updateBillIngInfo.js"></script>
+		<script type="text/javascript" src="myjs/billIngInfo/delBilInglInfo.js"></script>
+		<!--刷新支出收入信息-->
+		<script type="text/javascript" src="myjs/expincmoney/expincmoney.js"></script>
+        <!--统计账单-->
+        <script type="text/javascript" src="myjs/countBill/countBill.js"></script>
+		<!--用户信息-->
+		<script type="text/javascript" src="myjs/userInfo/userInfo.js"></script>
+	</head>
+
+	<body data-target="#scrollDiv" data-offset="0" data-spy="scroll">
+
+		<!-- 导航栏 -->
+		<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="javascript:void(0);">
+						<span class="glyphicon glyphicon-book"></span> 我的简单记账系统
+					</a>
+				</div>
+
+				<ul class="nav navbar-nav navbar-right">
+					<li class="dropdown" style="">
+						<a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
+							<span class="glyphicon glyphicon-user"></span> <span class="userNameNickName-span">[[${session.userInfo.userName}]]([[${session.userInfo.nickName}]])</span><span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu" role="menu">
+							<li>
+								<a href="javascript:void(0);" onclick="updatePassword();">修改密码</a>
+							</li>
+							<li class="divider"></li>
+							<li>
+								<a href="javascript:void(0);" th:href="@{/loginOut}">退出登录</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<!--1-->
+		<div class="container" style="margin-top:80px;">
+			<div class="row">
+				<!--
+                                            用户信息
+                -->
+				<div class="col-md-5">
+					<div class="jumbotron" style="height:120px;padding:10px;">
+						<div class="row">
+							<div class="col-sm-3">
+								<img src="" th:src="${session.userInfo.headImg}" style="height:100px;" class="img-thumbnail touxImg">
+							</div>
+							<div class="col-sm-9">
+								<h3 class="text-info">
+									<span class="span-NickName">[[${session.userInfo.nickName}]]&nbsp;</span>
+                                    <span class="glyphicon glyphicon-leaf userInfo-Btn" style="font-size:60%;"></span>
+    							</h3>
+								<span class="text-info">
+                                    <strong>当前时间：</strong>
+                                </span>
+								<span class="text-primary date-span"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-md-7">
+					<div class="panel panel-success">
+						<div class="panel-heading">
+							<h3 class="panel-title" style="font-family:微软雅黑">支出/收入信息</h3>
+						</div>
+						<div class="panel-body">
+							<span class="text-info">
+                                <strong>今日支出：</strong>
+                            </span>
+							<span class="text-primary" >￥ </span>
+							<span class="text-primary expMoneyInfos" style="display: inline-block; min-width: 80px;" th:text="${expIncMoneyInfos.expMoneyInfo!=null}?${expIncMoneyInfos.expMoneyInfo.sameDayMoney!=null?expIncMoneyInfos.expMoneyInfo.sameDayMoney:0}:0"></span>
+							<span class="text-info">
+                                <strong>本周支出：</strong>
+                            </span>
+							<span class="text-primary ">￥ </span>
+							<span class="text-primary expMoneyInfos" style="display: inline-block; min-width: 80px;" th:text="${expIncMoneyInfos.expMoneyInfo!=null}?${expIncMoneyInfos.expMoneyInfo.thisWeekMoney!=null?expIncMoneyInfos.expMoneyInfo.thisWeekMoney:0}:0"></span>
+							<span class="text-info">
+                                <strong>本月支出：</strong>
+                            </span>
+							<span class="text-primary" >￥ </span>
+							<span class="text-primary expMoneyInfos" style="display: inline-block; min-width: 80px;" th:text="${expIncMoneyInfos.expMoneyInfo!=null}?${expIncMoneyInfos.expMoneyInfo.thisMonthMoney!=null?expIncMoneyInfos.expMoneyInfo.thisMonthMoney:0}:0"></span>
+							<span class="text-info">
+                                <strong>今年支出：</strong>
+                            </span>
+							<span class="text-primary" >￥ </span>
+							<span class="text-primary expMoneyInfos" style="display: inline-block; min-width: 80px;"  th:text="${expIncMoneyInfos.expMoneyInfo!=null}?${expIncMoneyInfos.expMoneyInfo.thisYearMoney!=null?expIncMoneyInfos.expMoneyInfo.thisYearMoney:0}:0"></span>
+
+							<div style="margin-top: 9px;"></div>
+
+							<span class="text-info">
+                                <strong>今日收入：</strong>
+                            </span>
+							<span class="text-primary" >￥ </span>
+							<span class="text-primary incMoneyInfos" style="display: inline-block; min-width: 80px;" th:text="${expIncMoneyInfos.incMoneyInfo!=null}?${expIncMoneyInfos.incMoneyInfo.sameDayMoney!=null?expIncMoneyInfos.incMoneyInfo.sameDayMoney:0}:0"></span>
+							<span class="text-info">
+                                <strong>本周收入：</strong>
+                            </span>
+							<span class="text-primary" >￥ </span>
+							<span class="text-primary incMoneyInfos" style="display: inline-block; min-width: 80px;" th:text="${expIncMoneyInfos.incMoneyInfo!=null}?${expIncMoneyInfos.incMoneyInfo.thisWeekMoney!=null?expIncMoneyInfos.incMoneyInfo.thisWeekMoney:0}:0"></span>
+							<span class="text-info">
+                                <strong>本月收入：</strong>
+                            </span>
+							<span class="text-primary" >￥ </span>
+							<span class="text-primary incMoneyInfos" style="display: inline-block; min-width: 80px;" th:text="${expIncMoneyInfos.incMoneyInfo!=null}?${expIncMoneyInfos.incMoneyInfo.thisMonthMoney!=null?expIncMoneyInfos.incMoneyInfo.thisMonthMoney:0}:0"></span>
+							<span class="text-info">
+                                <strong>今年收入：</strong>
+                            </span>
+							<span class="text-primary" >￥ </span>
+							<span class="text-primary incMoneyInfos" style="display: inline-block; min-width: 80px;" th:text="${expIncMoneyInfos.incMoneyInfo!=null}?${expIncMoneyInfos.incMoneyInfo.thisYearMoney!=null?expIncMoneyInfos.incMoneyInfo.thisYearMoney:0}:0"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!------>
+			
+			
+			<div class="row">
+				<div class="col-md-12">
+					<ul id="myTab1" class="nav nav-tabs bg-info">
+						<li class="active">
+							<a href="#myLi1" data-toggle="tab" class="billIngInfo-Btn">账单</a>
+						</li>
+						<li>
+							<a href="#myLi2" data-toggle="tab" class="billMoney-count-Btn">统计</a>
+						</li>
+						<li>
+							<a href="#myLi3" data-toggle="tab" class="billcate_btn">账单大类</a>
+						</li>
+						<li>
+							<a href="#myLi4" data-toggle="tab" class="billCateMin-Btn">账单小类</a>
+						</li>
+					</ul>
+					<div id="myTabContent" class="tab-content">
+
+						<!-- 第一块操作区 -->
+						<div class="tab-pane fade in active" id="myLi1">
+							<div id="myLi11">
+								<div class="space_sm"></div>
+								<div class="row">
+									<div class="col-md-12">
+										<div class="panel panel-warning">
+											<div class="panel-heading" style="background-color:#fcf8e3;border-color:#faebcc;color:#8a6d3b;">
+												<h3 class="panel-title" style="color:#8a6d3b;font-family:微软雅黑">账单信息</h3>
+											</div>
+											<div class="panel-body" style="height: 552px">
+													<!--
+            								   		查询条件
+            								   	-->
+												<div>
+													<form role="form" class="queryBillIngInfoForm">
+														<div class="form-group col-lg-1" style="padding: 0px;margin-right: 10px;">
+															<input type="text" name="startDate" id="startDate" class="form-control">
+														</div>
+														<div class="form-group col-lg-1" style="padding: 0px;width: 15px;margin-right: 10px;margin-top: 10px;">
+															<span class="form-inline">至</span>
+														</div>
+														<div class="form-group col-lg-1" style="padding: 0px;margin-right: 10px;">
+															<input type="text" name="endDate" id="endDate" class="form-control">
+														</div>
+														<div class="form-group col-lg-1" style="padding: 0px;margin-right: 10px;">
+															<select name="billCategoryId" class="form-control billIng-bcMax-Select">
+															</select>
+														</div>
+														<div class="form-group col-lg-1" style="padding: 0px;margin-right: 10px;">
+															<select name="billCateMinId" class="form-control billIng-bcMin-Select">
+																<option value="">记账小类</option>
+															</select>
+														</div>
+														<div class="form-group col-lg-1" style="padding: 0px;margin-right: 10px;">
+															<select name="billType" class="form-control">
+																<option value="">记账类型</option>
+																<option value="支出">支出</option>
+																<option value="收入">收入</option>
+															</select>
+														</div>
+														<div class="form-group col-lg-2" style="padding: 0px;margin-right: 10px;">
+															<input type="text" name="billDesCribe" class="form-control" placeholder="记账描述">
+														</div>
+														<a href="javascript:void();" class="btn btn-info queryBillIngInfoBtn" style="background: #5BC0DE;border: #5BC0DE;">
+															<span class="glyphicon glyphicon-search"></span> 查询
+														</a>
+													</form>
+												</div>
+												<!--
+            								   		添加操作
+            								   	-->
+												<div style="clear: both;">
+													<a href="javascript:void();" onclick="addBillIngUi();" class="btn btn-info" style="background: #009688;border: #009688;margin-right: 10px;">
+														<span class="glyphicon glyphicon-plus-sign"></span> 新增
+													</a>
+													<a href="javascript:void();" onclick="delSelectBillIng();" class="btn btn-info" style="background: #FF5722;border: #FF5722;">
+														<span class="glyphicon glyphicon-trash"></span> 批量删除
+													</a>
+												</div>
+												<!--
+            								   		账单表格信息
+            								   	-->
+												<table class="table table-striped">
+													<thead>
+														<tr>
+															<th width="5%"><input type="checkbox" class="billIng-all-select"></th>
+															<th width="5%">序号</th>
+															<th width="10%">支出/收入时间</th>
+															<th width="10%">记账大类</th>
+															<th width="10%">记账小类</th>
+															<th width="10%">记账类型</th>
+															<th width="10%">支出/收入金额</th>
+															<th width="20%">记账描述</th>
+															<th width="10%">记录时间</th>
+															<th width="10%">操作</th>
+														</tr>
+													</thead>
+													<tbody class="billIngListTb">
+
+													</tbody>
+												</table>
+												<!--分页-->
+												<div style="position: absolute;bottom: 35px;">
+													<ul class="pagination bill-ing-page" style="margin: 0 ">
+
+													</ul>
+												</div>
+												
+												
+												
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						<!-- 第二块操作区 -->
+						<div class="tab-pane fade" id="myLi2">
+
+							<div class="space_sm"></div>
+
+							<div class="row">
+								<div class="col-md-12">
+									<div class="panel panel-warning">
+										<div class="panel-heading" style="background-color:#fcf8e3;border-color:#faebcc;color:#8a6d3b;">
+											<h3 class="panel-title" style="color:#8a6d3b;font-family:微软雅黑">账单统计</h3>
+										</div>
+										<div class="panel-body" style="height: 552px;">
+											<!--
+    										   		查询条件
+    										   	-->
+											<div>
+												<form role="form" class="countBillMoneyForm">
+													<div class="form-group col-lg-1" style="padding: 0px;margin-right: 10px;">
+														<select name="yearMonthType" class="form-control year-month-select">
+															<option value="month">按月统计</option>
+															<option value="year">按年统计</option>
+														</select>
+													</div>
+													<div class="form-group col-lg-1 billCountDateDiv" style="padding: 0px;margin-right: 10px;">
+
+													</div>
+													<div class="form-group col-lg-1" style="padding: 0px;margin-right: 10px;">
+														<select name="billType" class="form-control billType">
+															<option value="支出">支出统计</option>
+															<option value="收入">收入统计</option>
+														</select>
+													</div>
+													<a href="javascript:void(0);" class="btn btn-info countBillMoneyBtn" style="background: #5BC0DE;border: #5BC0DE;">
+														<span class="glyphicon glyphicon-search"></span> 查询
+													</a>
+												</form>
+											</div>
+											
+											<!--收入支出统计-->
+											<div style="clear: both;">
+												<span class="text-info">
+						                          <strong>支出：</strong>
+						                        </span>
+												<span class="text-primary count-expmoney"></span>&nbsp;<strong>|</strong>&nbsp;
+												<span class="text-info">
+						                          <strong>收入：</strong>
+						                        </span>
+												<span class="text-primary count-incmoney"></span>&nbsp;
+    										</div>
+											
+											
+											<!--
+    										   		支出/收入排行榜
+    										   	-->
+    										   	<div class="container-fluid">
+    											   	<div class="row">
+                                                        <!--支出排行榜-->
+    											   		<div class="col-sm-4">
+    											   			<div class="row" >
+    											   				<h4 style="color:#8a6d3b;font-family:微软雅黑" class="count-h4-expinc"></h3>
+    											   				<table class="table">
+    																<thead>
+    																	<tr>
+    																		<th>序号</th>
+    																		<th>支出时间</th>
+    																		<th>记账描述</th>
+    																		<th>支出金额</th>
+    																	</tr>
+    																</thead>
+    																<tbody class="count-orderby-eimoney">
+
+    																</tbody>
+    															</table>
+    											   			</div>
+    											   		</div>
+                                                        <!--支出统计-->
+    											   		<div class="col-sm-5" style="padding: 0;max-height: 420px;">
+    											   			<h4 style="color:#8a6d3b;font-family:微软雅黑" class="count-h4-expinc"></h3>
+    											   			<div class="row" id="quxian" style="margin: 0;padding: 0;"></div>
+    											   		</div>
+                                                        <!--支出分类-->
+    											   		<div class="col-sm-3" style="padding: 0;max-height: 420px;">
+    											   			<h4  style="color:#8a6d3b;font-family:微软雅黑" class="count-h4-expinc"></h3>
+    											   			<div class="row" id="bingtu" style="padding: 0;"></div>
+    											   		</div>
+    											   	</div>
+    											</div>
+											<br>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- 第三块操作区 -->
+						<div class="tab-pane fade" id="myLi3">
+
+							<div class="space_sm"></div>
+
+							<div class="row">
+								<div class="col-md-12">
+									<div class="panel panel-warning">
+										<div class="panel-heading" style="background-color:#fcf8e3;border-color:#faebcc;color:#8a6d3b;">
+											<h3 class="panel-title" style="color:#8a6d3b;font-family:微软雅黑">账单大类</h3>
+										</div>
+										<div class="panel-body" style="height: 552px;">
+
+												
+												<!--
+            								   		查询条件
+            								   	-->
+												<div>
+													<form role="form" class="queryBillCateForm">
+														<div class="form-group col-lg-2" style="padding: 0px;margin-right: 10px;">
+															<input type="text" name="billCategoryName" class="form-control" placeholder="大类名称">
+														</div>
+														<a href="#" class="btn btn-info billCategoryBtn" style="background: #5BC0DE;border: #5BC0DE;">
+															<span class="glyphicon glyphicon-search"></span> 查询
+														</a>
+													</form>
+												</div>
+												<!--
+            								   		添加操作
+            								   	-->
+												<div style="clear: both;">
+													<a href="javascript:void();" onclick="addBillCateUi();" class="btn btn-info" style="background: #009688;border: #009688;margin-right: 10px;">
+														<span class="glyphicon glyphicon-plus-sign"></span> 新增
+													</a>
+													<a href="javascript:void();" class="btn btn-info" onclick="delSelectBillCate();" style="background: #FF5722;border: #FF5722;">
+														<span class="glyphicon glyphicon-trash"></span> 批量删除
+													</a>
+												</div>
+
+
+
+												<table class="table table-striped">
+    																<thead>
+    																	<tr>
+																			<th style="width: 20%"><input type="checkbox" class="billc-all-select"></th>
+    																		<th style="width: 20%">序号</th>
+    																		<th style="width: 20%">大类名称</th>
+    																		<th style="width: 20%"> 添加时间</th>
+    																		<th style="width: 20%">操作</th>
+    																	</tr>
+    																</thead>
+    																<tbody class="billCateInfoTb">
+
+    																</tbody>
+    															</table>
+														<!--分页-->
+														<div style="position: absolute;bottom: 35px;">
+															<ul class="pagination bill-cate-page" style="margin: 0">
+															</ul>
+														</div>
+
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- 第四块操作区 -->
+						<div class="tab-pane fade" id="myLi4">
+
+							<div class="space_sm"></div>
+
+							<div class="row">
+								<div class="col-md-12">
+									<div class="panel panel-warning">
+										<div class="panel-heading" style="background-color:#fcf8e3;border-color:#faebcc;color:#8a6d3b;">
+											<h3 class="panel-title" style="color:#8a6d3b;font-family:微软雅黑">账单小类</h3>
+										</div>
+										<div class="panel-body" style="height: 552px;">
+
+
+
+
+												<!--
+            								   		查询条件
+            								   	-->
+												<div>
+													<form role="form" class="queryBillCateMinForm">
+														<div class="form-group col-lg-1" style="padding: 0px;margin-right: 10px;">
+															<select name="billCategoryId" class="form-control bCMin-BCMax-Select">
+															</select>
+														</div>
+														<div class="form-group col-lg-2" style="padding: 0px;margin-right: 10px;">
+															<input name="billCateMinName" type="text" class="form-control" placeholder="小类名称">
+														</div>
+														<a href="javascript:void();" class="btn btn-info queryBillCateMinBtn" style="background: #5BC0DE;border: #5BC0DE;">
+															<span class="glyphicon glyphicon-search"></span> 查询
+														</a>
+													</form>
+												</div>
+												<!--
+            								   		添加操作
+            								   	-->
+												<div style="clear: both;">
+													<a href="javascript:void();" onclick="addBillCateMinUi();" class="btn btn-info" style="background: #009688;border: #009688;margin-right: 10px;">
+														<span class="glyphicon glyphicon-plus-sign"></span> 新增
+													</a>
+													<a href="javascript:void();" onclick="delSelectBillCateMin();" class="btn btn-info" style="background: #FF5722;border: #FF5722;">
+														<span class="glyphicon glyphicon-trash"></span> 批量删除
+													</a>
+												</div>
+
+
+
+												<table class="table table-striped">
+    																<thead>
+    																	<tr>
+																			<th style="width: 16.6%"><input type="checkbox" class="billcMin-all-select"></th>
+    																		<th style="width: 16.6%">序号</th>
+    																		<th style="width: 16.6%">大类名称</th>
+																			<th style="width: 16.6%">小类名称</th>
+    																		<th style="width: 16.6%">添加时间</th>
+    																		<th style="width: 16.6%">操作</th>
+    																	</tr>
+    																</thead>
+    																<tbody class="billCateMinInfoTb">
+
+    																</tbody>
+    															</table>
+
+
+														<!--分页-->
+														<div style="position: absolute;bottom: 35px;">
+															<ul class="pagination bill-cateMin-page" style="margin: 0 ">
+
+															</ul>
+														</div>
+
+
+
+
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+   <div style="text-align: center;height: 40px;width: 100%;color: #BBBBBB;font-weight:normal;">©Copyright 2020 gl All Rights Reserved</div>
+</body>
+
+</html>

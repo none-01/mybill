@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.5.4//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bill.dao.BillCateDao">
+    <!--查询用户的大类-->
+    <select id="queryBillCateInfo" parameterType="BillCate" resultType="BillCate">
+        SELECT `billCategoryId`,`billCategoryName`,`createDate`
+        FROM `bill_category_tb` WHERE `userId`=#{userId}
+        <if test="billCategoryName!=null and billCategoryName!=''">
+            and billCategoryName LIKE CONCAT(CONCAT('%', #{billCategoryName}), '%')
+        </if>
+    </select>
+
+    <!--检查大类名称是否存在-->
+    <select id="checkBillCate" resultType="BillCate">
+        select `billCategoryName`
+        from `bill_category_tb`
+        where `userId`=#{userId} and billCategoryName=#{billCategoryName}
+    </select>
+
+    <!--添加账单大类信息-->
+    <insert id="addBillCateInfo">
+        insert into `bill_category_tb`(`billCategoryName`,`userId`,`createDate`)
+        values(#{billCategoryName},#{userId},#{createDate})
+    </insert>
+
+    <!--查询要修改的信息-->
+    <select id="queryUpdateBillCate" resultType="BillCate">
+        select `billCategoryId`,`billCategoryName`
+        from `bill_category_tb`
+        where `userId`=#{userId} and `billCategoryId`=#{billCategoryId}
+    </select>
+
+    <!--修改大类信息-->
+    <update id="updateBillCateInfo">
+        update `bill_category_tb`
+        set `billCategoryName`=#{billCategoryName},`updateDate`=#{updateDate}
+        where `userId`=#{userId} and `billCategoryId`=#{billCategoryId}
+    </update>
+
+    <!--删除大类信息-->
+    <delete id="delOneBillCateInfo">
+        delete from `bill_category_tb`
+        where `userId`=#{userId} and `billCategoryId`=#{billCategoryId}
+    </delete>
+
+    <!--删除选中的大类信息-->
+    <delete id="delSelectBillCate">
+        delete from `bill_category_tb`
+        where `userId`=#{userId}
+        and `billCategoryId`
+        in
+            <foreach collection="billCategoryIds" item="id" index="no" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+    </delete>
+
+    <!--根据用户的id查询用户的大类-->
+    <select id="queryBillCateMaxInfo" resultType="BillCate">
+        SELECT `billCategoryId`,`billCategoryName`
+        FROM `bill_category_tb`
+        WHERE `userId`=#{userId}
+    </select>
+</mapper>
